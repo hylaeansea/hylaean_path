@@ -29,7 +29,7 @@ async function run() {
   camera.position.set(1e7, 1e7, 1e7);
 
   // Create the renderer.
-  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  const renderer = new THREE.WebGLRenderer({ logarithmicDepthBuffer: true, antialias: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild(renderer.domElement);
 
@@ -38,25 +38,35 @@ async function run() {
   controls.target.set(0, 0, 0);
   controls.update();
 
-  // Add a wireframe icosahedron with a radius of 6,700,000 meters (solid version)
-  const icosahedronGeometry = new THREE.IcosahedronGeometry(6700000, 4);
-  icosahedronGeometry.computeVertexNormals(); // Recompute normals
-  
-  const icosahedronMaterial = new THREE.MeshBasicMaterial({
-    color: 0x888888,
-    wireframe: false,
-    side: THREE.FrontSide,
+  //— LIGHTS —//
+  const ambientLight = new THREE.AmbientLight(0x404040, 1.0); // soft white ambient
+  scene.add(ambientLight);
+
+  const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+  dirLight.position.set(1e7, 1e7, 1e7).normalize();
+  scene.add(dirLight);
+
+  //— ICOSAHEDRON —//
+  const icoGeo = new THREE.IcosahedronGeometry(6_700_000, 2);
+  icoGeo.computeVertexNormals(); // recompute normals especially if you’ve inverted or scaled
+
+  const icoMat = new THREE.MeshStandardMaterial({
+    color: 0x88ffff,
+    side: THREE.FrontSide,  // render only front faces
+    metalness: 0.0,
+    roughness: 1.0,
+    transparent: false,     // fully opaque
     depthTest: true,
     depthWrite: true,
   });
-  const icosahedronMesh = new THREE.Mesh(icosahedronGeometry, icosahedronMaterial);
-  icosahedronMesh.renderOrder = 0;
-  scene.add(icosahedronMesh);
+
+  const icoMesh = new THREE.Mesh(icoGeo, icoMat);
+  scene.add(icoMesh);
   
   // When creating satellite meshes:
   const satelliteMeshes = [];
   const satelliteGeometry = new THREE.SphereGeometry(1e5, 16, 16);
-  const satelliteMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+  const satelliteMaterial  = new THREE.MeshStandardMaterial({ color: 0xff0000 });
   for (let i = 0; i < nSatellites; i++) {
     const mesh = new THREE.Mesh(satelliteGeometry, satelliteMaterial);
     mesh.renderOrder = 1; // Render after the icosahedron
