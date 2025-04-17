@@ -8,7 +8,7 @@ fn main() {
     let gravitational_parameter = 3.986004418e14; // Earth's gravitational parameter in m³/s²
     let dt = 10.0; // time step in seconds
     let proximity_threshold = 10_000.0; // 100 km in meters
-    let n_satellites = 10_000;
+    let n_satellites = 200;
 
     let mut world = World::new();
     let mut rng = rand::thread_rng();

@@ -7,11 +7,17 @@ async function run() {
   // Initialize the Wasm module.
   await init();
 
-  // Create a simulation with 10 satellites.
-  const sim = new Simulation(10);
+  // Set the number of satellites as a variable.
+  const nSatellites = 5000;
+  // Create a simulation with nSatellites.
+  const sim = new Simulation(nSatellites);
 
   // Set up three.js scene.
   const scene = new THREE.Scene();
+
+  // Add axis helper (length can be adjusted; here we use 1e7 for visibility)
+  const axesHelper = new THREE.AxesHelper(1e7);
+  scene.add(axesHelper);
 
   // Set up a camera.
   const camera = new THREE.PerspectiveCamera(
@@ -20,27 +26,44 @@ async function run() {
     0.1,
     1e9
   );
-  camera.position.set(1e7, 1e7, 1e7); // Adjust as needed
+  camera.position.set(1e7, 1e7, 1e7);
 
   // Create the renderer.
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild(renderer.domElement);
 
-  // Add OrbitControls to allow user to orbit around the scene.
+  // Add OrbitControls.
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.target.set(0, 0, 0);
   controls.update();
 
-  // Create an array to hold satellite mesh objects.
+  // Add a wireframe icosahedron with a radius of 6,700,000 meters (solid version)
+  const icosahedronGeometry = new THREE.IcosahedronGeometry(6700000, 4);
+  icosahedronGeometry.computeVertexNormals(); // Recompute normals
+  
+  const icosahedronMaterial = new THREE.MeshBasicMaterial({
+    color: 0x888888,
+    wireframe: false,
+    side: THREE.FrontSide,
+    depthTest: true,
+    depthWrite: true,
+  });
+  const icosahedronMesh = new THREE.Mesh(icosahedronGeometry, icosahedronMaterial);
+  icosahedronMesh.renderOrder = 0;
+  scene.add(icosahedronMesh);
+  
+  // When creating satellite meshes:
   const satelliteMeshes = [];
-  const geometry = new THREE.SphereGeometry(1e5, 16, 16);
-  const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-  for (let i = 0; i < 10; i++) {
-    const mesh = new THREE.Mesh(geometry, material);
+  const satelliteGeometry = new THREE.SphereGeometry(1e5, 16, 16);
+  const satelliteMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+  for (let i = 0; i < nSatellites; i++) {
+    const mesh = new THREE.Mesh(satelliteGeometry, satelliteMaterial);
+    mesh.renderOrder = 1; // Render after the icosahedron
     scene.add(mesh);
     satelliteMeshes.push(mesh);
   }
+
 
   // Animation loop.
   function animate() {
@@ -49,7 +72,7 @@ async function run() {
     // Step the simulation.
     sim.step();
 
-    // Retrieve updated satellite positions.
+    // Update satellite positions.
     const positions = sim.get_positions(); // Returns an array of [x, y, z] arrays.
     positions.forEach((pos, i) => {
       if (satelliteMeshes[i]) {

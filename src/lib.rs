@@ -1,5 +1,9 @@
 // src/lib.rs
 
+// Re-export the wasm interface so that its exports are available at the top level.
+pub mod wasm_interface;
+pub use wasm_interface::*;
+
 /// This module contains the core ECS implementation using Vec storage and Rayon for parallelism.
 pub mod ecs {
     use rayon::prelude::*;
