@@ -22,7 +22,7 @@ fn main() {
         // Random cosine of inclination (u) in [-1, 1]
         let u: f64 = rng.gen_range(-1.0..1.0);
         // Inclination φ = acos(u); sin(φ) = sqrt(1 - u²)
-        let phi = u.acos();
+        // let phi = u.acos();
         let sin_phi = (1.0 - u * u).sqrt();
 
         // Convert spherical coordinates to Cartesian coordinates.
@@ -32,25 +32,57 @@ fn main() {
             z: r * u,
         };
 
-        // Compute orbital velocity for a circular orbit: v = √(μ / r)
-        let orbital_velocity = (gravitational_parameter / r).sqrt();
+        // 1. Pick a small eccentricity (e.g. up to 0.1 for “nearly” circular)
+        let e: f64 = rng.gen_range(0.0..0.4);
 
-        // Choose a reference vector that is not parallel to pos.
-        let (ref_x, ref_y, ref_z) = if pos.x.abs() < 1e-6 && pos.y.abs() < 1e-6 {
-            (1.0, 0.0, 0.0)
-        } else {
-            (0.0, 0.0, 1.0)
+        // 2. Pick a random true anomaly ν in [0, 2π)
+        let nu: f64 = rng.gen_range(0.0..TAU);
+
+        // 3. Compute the semi‑latus rectum p = r * (1 + e cos ν)
+        let p = r * (1.0 + e * nu.cos());
+
+        // 4. Compute radial & tangential speeds for an ellipse
+        //    Vᵣ = √(μ/p) · e · sin ν
+        //    Vₜ = √(μ/p) · (1 + e cos ν)
+        let mu = gravitational_parameter;
+        let sqrt_mu_p = (mu / p).sqrt();
+        let vr = sqrt_mu_p * e * nu.sin();
+        let vt = sqrt_mu_p * (1.0 + e * nu.cos());
+
+        // 5. Unit radial vector r̂ = pos / r
+        let r_hat = (pos.x / r, pos.y / r, pos.z / r);
+
+        // 6. Pick a random “reference” vector and orthogonalize to r̂ to get the orbital plane normal
+        let n_hat = loop {
+            let candidate = (
+                rng.gen_range(-1.0..1.0),
+                rng.gen_range(-1.0..1.0),
+                rng.gen_range(-1.0..1.0),
+            );
+            // cross(r̂, candidate)
+            let cross = (
+                r_hat.1 * candidate.2 - r_hat.2 * candidate.1,
+                r_hat.2 * candidate.0 - r_hat.0 * candidate.2,
+                r_hat.0 * candidate.1 - r_hat.1 * candidate.0,
+            );
+            let norm = (cross.0*cross.0 + cross.1*cross.1 + cross.2*cross.2).sqrt();
+            if norm > 1e-6 {
+                break (cross.0 / norm, cross.1 / norm, cross.2 / norm);
+            }
         };
 
-        // Compute cross product: velocity direction = pos × ref.
-        let vx = pos.y * ref_z - pos.z * ref_y;
-        let vy = pos.z * ref_x - pos.x * ref_z;
-        let vz = pos.x * ref_y - pos.y * ref_x;
-        let norm = (vx * vx + vy * vy + vz * vz).sqrt();
+        // 7. Tangential unit vector θ̂ = cross(n̂, r̂)
+        let theta_hat = (
+            n_hat.1 * r_hat.2 - n_hat.2 * r_hat.1,
+            n_hat.2 * r_hat.0 - n_hat.0 * r_hat.2,
+            n_hat.0 * r_hat.1 - n_hat.1 * r_hat.0,
+        );
+
+        // 8. Combine radial + tangential components
         let vel = Velocity {
-            dx: (vx / norm) * orbital_velocity,
-            dy: (vy / norm) * orbital_velocity,
-            dz: (vz / norm) * orbital_velocity,
+            dx: vr * r_hat.0 + vt * theta_hat.0,
+            dy: vr * r_hat.1 + vt * theta_hat.1,
+            dz: vr * r_hat.2 + vt * theta_hat.2,
         };
 
         world.add_entity(pos, vel);
