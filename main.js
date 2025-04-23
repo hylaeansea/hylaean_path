@@ -66,8 +66,9 @@ async function run() {
   // When creating satellite meshes:
   const satelliteMeshes = [];
   const satelliteGeometry = new THREE.SphereGeometry(1e5, 16, 16);
-  const satelliteMaterial  = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+  
   for (let i = 0; i < nSatellites; i++) {
+    const satelliteMaterial  = new THREE.MeshStandardMaterial({ color: 0xff0000 });
     const mesh = new THREE.Mesh(satelliteGeometry, satelliteMaterial);
     mesh.renderOrder = 1; // Render after the icosahedron
     scene.add(mesh);
@@ -77,24 +78,37 @@ async function run() {
 
   // Animation loop.
   function animate() {
-    requestAnimationFrame(animate);
+      requestAnimationFrame(animate);
 
-    // Step the simulation.
-    sim.step();
+      // Step the simulation.
+      sim.step();
 
-    // Update satellite positions.
-    const positions = sim.get_positions(); // Returns an array of [x, y, z] arrays.
-    positions.forEach((pos, i) => {
-      if (satelliteMeshes[i]) {
-        satelliteMeshes[i].position.set(pos[0], pos[1], pos[2]);
-      }
-    });
+      // Get satellites in proximity warning state
+      const proximityWarnings = sim.get_proximity_warnings(); // Get the array of satellite IDs in proximity
+      console.log(proximityWarnings);
+      // Update satellite positions and colors.
+      const positions = sim.get_positions(); // Returns an array of [x, y, z] arrays.
+      positions.forEach((pos, i) => {
+        if (satelliteMeshes[i]) {
+          // Update position
+          satelliteMeshes[i].position.set(pos[0], pos[1], pos[2]);
+          
+          // Update color based on proximity warning
+          if (proximityWarnings.includes(i)) {
+            // Set to bright red for satellites in proximity
+            satelliteMeshes[i].material.color.setRGB(1, 0, 0);
+          } else {
+            // Set to white (or any default color) for normal satellites
+            satelliteMeshes[i].material.color.setRGB(1, 1, 1);
+          }
+        }
+      });
 
-    // Update orbit controls.
-    controls.update();
+      // Update orbit controls.
+      controls.update();
 
-    // Render the scene.
-    renderer.render(scene, camera);
+      // Render the scene.
+      renderer.render(scene, camera);
   }
   animate();
 }
