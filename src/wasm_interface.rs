@@ -113,7 +113,7 @@ impl Simulation {
         propagate_system(&mut self.world, self.dt);
         
         // Set a reasonable threshold for proximity detection
-        let proximity_threshold = 100000.0;
+        let proximity_threshold = 20000.0;
         
         // Get new warnings
         let new_warnings = proximity_detection_system(&self.world, proximity_threshold);
