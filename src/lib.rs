@@ -1,12 +1,18 @@
 // src/lib.rs
 
+
 // Re-export the wasm interface so that its exports are available at the top level.
 pub mod wasm_interface;
 pub use wasm_interface::*;
 
+
+
 /// This module contains the core ECS implementation using Vec storage and Rayon for parallelism.
 pub mod ecs {
     use rayon::prelude::*;
+    use std::collections::HashSet;
+    use std::sync::Mutex;
+
 
     #[derive(Debug, Clone)]
     pub struct Position {
@@ -27,6 +33,8 @@ pub mod ecs {
     pub struct World {
         pub positions: Vec<Position>,
         pub velocities: Vec<Velocity>,
+        pub proximity_warnings: HashSet<usize>,
+        // ... other fields
     }
 
     impl World {
@@ -35,6 +43,7 @@ pub mod ecs {
             Self {
                 positions: Vec::new(),
                 velocities: Vec::new(),
+                proximity_warnings: std::collections::HashSet::new(),
             }
         }
 
@@ -82,10 +91,13 @@ pub mod ecs {
     ///
     /// If the distance between any two satellites is less than `threshold` (in meters),
     /// it prints a warning.
-    pub fn proximity_detection_system(world: &World, threshold: f64) {
+    pub fn proximity_detection_system(world: &World, threshold: f64) -> HashSet<usize> {
         let positions = &world.positions;
         let len = positions.len();
+        let warning_mutex = Mutex::new(HashSet::new());
+        
         (0..len).into_par_iter().for_each(|i| {
+            let mut local_warnings = HashSet::new();
             for j in (i + 1)..len {
                 let pos1 = &positions[i];
                 let pos2 = &positions[j];
@@ -98,8 +110,21 @@ pub mod ecs {
                         "Warning: Satellites {} and {} are within {:.2} m (distance = {:.2} m)",
                         i, j, threshold, distance
                     );
+                    
+                    // Store locally
+                    local_warnings.insert(i);
+                    local_warnings.insert(j);
                 }
             }
+            
+            // After processing, merge local warnings
+            if !local_warnings.is_empty() {
+                let mut global_warnings = warning_mutex.lock().unwrap();
+                global_warnings.extend(local_warnings);
+            }
         });
+        
+        // Return the warnings
+        warning_mutex.into_inner().unwrap()
     }
 }

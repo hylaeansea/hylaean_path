@@ -7,9 +7,14 @@
     "preview": "vite preview"
   },
   "devDependencies": {
-    "vite": "^4.0.0"
+    "vite": "^4.5.13"
   },
   "dependencies": {
     "three": "^0.146.0"
-  }
+  },
+  "description": "An experiment with the Entity Component System design pattern for physics and game engines, initially focused on Satellite propagation",
+  "main": "main.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }
