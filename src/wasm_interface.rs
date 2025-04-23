@@ -26,7 +26,7 @@ impl Simulation {
         // Create n random satellites in full 3D space.
         for _ in 0..n_satellites {
             // Generate a random orbital radius between 6.5e6 and 7.0e6 meters.
-            let r: f64 = rng.gen_range(6.8e6..7.0e6);
+            let r: f64 = rng.gen_range(7.6e6..7.601e6);
             // Random azimuth angle (θ) in [0, 2π)
             let theta = rng.gen_range(0.0..TAU);
             // Random cosine of inclination (u) in [-1, 1]
@@ -43,7 +43,7 @@ impl Simulation {
             };
     
             // 1. Pick a small eccentricity (e.g. up to 0.1 for “nearly” circular)
-            let e: f64 = rng.gen_range(0.0..0.1);
+            let e: f64 = rng.gen_range(0.0..0.001);
     
             // 2. Pick a random true anomaly ν in [0, 2π)
             let nu: f64 = rng.gen_range(0.0..TAU);
