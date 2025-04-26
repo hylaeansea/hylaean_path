@@ -3,13 +3,18 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - main  # or master, depending on your default branch name
+      - main
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
       
       - name: Set up Rust
         uses: actions-rs/toolchain@v1
@@ -21,16 +26,11 @@ jobs:
       - name: Install wasm-pack
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
       
-      - name: Build WebAssembly
-        run: wasm-pack build --target web
+      - name: Install dependencies
+        run: npm install
       
-      - name: Create dist directory
-        run: |
-          mkdir -p dist
-          cp main.js dist/
-          cp -r pkg dist/
-          cp index.html dist/
-          # Add any other static assets you need (CSS, images, etc.)
+      - name: Build WebAssembly and Vite
+        run: npm run build
       
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@4.1.4

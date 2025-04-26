@@ -2,12 +2,13 @@
   "name": "hylaean_path",
   "version": "0.1.0",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "build": "wasm-pack build --target web && vite build",
+    "dev": "wasm-pack build --target web && vite"
   },
   "devDependencies": {
-    "vite": "^4.5.13"
+    "vite": "^4.5.13",
+    "vite-plugin-top-level-await": "^1.5.0",
+    "vite-plugin-wasm": "^3.4.1"
   },
   "dependencies": {
     "three": "^0.146.0"
