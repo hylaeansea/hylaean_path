@@ -8,7 +8,7 @@ async function run() {
   await init();
 
   // Set the number of satellites as a variable.
-  const nSatellites = 5000;
+  const nSatellites = 500;
   // Create a simulation with nSatellites.
   const sim = new Simulation(nSatellites);
 
