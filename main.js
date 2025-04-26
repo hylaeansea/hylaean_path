@@ -96,7 +96,7 @@ async function run() {
           // Update color based on proximity warning
           if (proximityWarnings.includes(i)) {
             // Set to bright red for satellites in proximity
-            satelliteMeshes[i].material.color.setRGB(1, 0.75, 1);
+            satelliteMeshes[i].material.color.setRGB(1, 0, 0);
           } else {
             // Set to white (or any default color) for normal satellites
             satelliteMeshes[i].material.color.setRGB(1, 1, 1);
