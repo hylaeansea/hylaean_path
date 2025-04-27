@@ -13,4 +13,7 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['hylaean_path']
   }
+  resolve: {
+    dedupe: ['three']
+  }
 });
