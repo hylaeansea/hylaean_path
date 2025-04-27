@@ -1,14 +1,14 @@
 import { defineConfig } from 'vite'
 
 export default defineConfig({
-  base: '/hylaean_path/',  // Should match your repository name
+  // base: '/hylaean_path/',
   build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
     rollupOptions: {
-      output: {
-        manualChunks: {
-          three: ['three']
-        }
-      }
+      input: {
+        main: './index.html',
+      },
     }
   }
 })
