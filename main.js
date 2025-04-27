@@ -1,6 +1,14 @@
 // main.js
-import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+// import * as THREE from 'three';
+// import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+
+// Use:
+// import * as THREE from '/hylaean_path/node_modules/three/build/three.module.js';
+
+// Or alternatively, you can use:
+import * as THREE from './node_modules/three/build/three.module.js';
+import { OrbitControls } from './node_modules/three/examples/jsm/controls/OrbitControls.js';
+
 import init, { Simulation } from './pkg/hylaean_path.js';
 
 async function run() {
