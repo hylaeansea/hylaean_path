@@ -14,6 +14,9 @@ export default defineConfig({
     exclude: ['hylaean_path']
   },
   resolve: {
-    dedupe: ['three']
+    dedupe: ['three'],
+    alias: {
+      'three': require.resolve('three')
+    }
   }
 });
