@@ -16,7 +16,8 @@ export default defineConfig({
   resolve: {
     dedupe: ['three'],
     alias: {
-      'three': require.resolve('three')
+      'three': require.resolve('three'),
+      'three/examples/jsm': path.resolve(__dirname, 'node_modules/three/examples/jsm')
     }
   }
 });
