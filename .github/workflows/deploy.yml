@@ -1,24 +1,19 @@
 name: Deploy to GitHub Pages
-
 on:
   push:
     branches:
       - main
-
 permissions:
   contents: write
-
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      
+      - uses: actions/checkout@v3
       - name: Setup Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: '16'
-          
       - name: Cache node modules
         uses: actions/cache@v4
         with:
@@ -26,25 +21,21 @@ jobs:
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
-    
       - name: Set up Rust
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
           target: wasm32-unknown-unknown
           override: true
-      
       - name: Install wasm-pack
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-      
       - name: Install dependencies
-        run: npm install --verbose
-
-      - name: Build WebAssembly and Vite
-        run: npm run build --verbose
-      
+        run: npm install
+      - name: Build
+        run: npm run build
       - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@4.1.4
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
           folder: dist
+          clean: true
